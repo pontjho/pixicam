@@ -2,8 +2,9 @@ var bindAll = require('lodash/function/bindAll'),
   augment = require('./vendor/augment'),
   glmatrix = require('./vendor/gl-matrix'),
   Rectangle = require('./math/rectangle'),
-  Point = require('./math/point');
-  
+  Point = require('./math/point'),
+  pixi = require('pixi.js');
+
 var mat2d = glmatrix.mat2d;
 var vec2 = glmatrix.vec2;
 
@@ -22,22 +23,23 @@ var Camera = augment.defclass({
     //calculated world viewport
     this._viewport = new Rectangle(0, 0, 0, 0);
 
-    this.transform = new PIXI.Matrix();
+    this.transform = new pixi.Matrix();
+    this.followTargets = [];
   },
-  
+
   unfollow: function(){
-    this.followTarget = undefined;
+    this.followTargets = [];
   },
 
   follow: function(target){
-    this.followTarget = target;
+    this.followTargets.push(target);
   },
 
   getInverseMatrix: function(){
     var m = this.getMatrix();
     return mat2d.invert([], m);
   },
-  
+
   cameraToWorldPoint: function(p){
     return this.worldToScreen(p);
   },
@@ -75,7 +77,7 @@ var Camera = augment.defclass({
   getViewSize: function(){
     return this.view;
   },
-  
+
   setScreenSize: function(width, height){
     this.view.width = width;
     this.view.height = height;
@@ -87,17 +89,17 @@ var Camera = augment.defclass({
     var br = this.worldToScreen({x: this.view.width, y: this.view.height});
 
     this._viewport.set(tl.x, tl.y, (br.x-tl.x),(br.y-tl.y));
-    
+
     //remove the view center ?
     //this._viewport.set(tl.x + this._viewCenter.x, tl.y + this._viewCenter.y, (br.x-tl.x),(br.y-tl.y));
-    
+
     return this._viewport;
   },
 
   getMatrix: function(){
     var mat = mat2d.identity([]);
     mat2d.translate(mat, mat, [this._zoomPivot.x, this._zoomPivot.y ]);
-    
+
     var position = [this._position.x, this._position.y];
     this.view.x = this._position.x;
     this.view.y = this._position.y;
@@ -111,9 +113,25 @@ var Camera = augment.defclass({
     return mat;
   },
   update: function(){
-    if(this.followTarget){
-      this.x = this.followTarget.x;
-      this.y = this.followTarget.y;
+    if(this.followTargets.length){
+        // this.x = this.followTargets.reduce((a, b) => Math.min(a.x, b.x));
+        // this.y = this.followTargets.reduce((a, b) => Math.min(a.y, b.y));
+
+        var minX = this.followTargets.reduce((a, b) => Math.min(a.x, b.x));
+        var minY = this.followTargets.reduce((a, b) => Math.min(a.y, b.y));
+        var maxX = this.followTargets.reduce((a, b) => Math.max(a.x, b.x));
+        var maxY = this.followTargets.reduce((a, b) => Math.max(a.y, b.y));
+
+        var x = (minX + maxX) / 2;
+        var y = (minY + maxY) / 2;
+
+        this.x = x;
+        this.y = y;
+
+        var zoomX = this.view.width / (maxX - minX + this.view.width * 0.3);
+        //var zoomY = ((maxY - minY) / this.view.height) || 1;
+        //this.zoom = Math.min(zoomX, zoomY);
+        this.zoom = Math.min(zoomX, 1.5);
     }
 
     this.updateTransform();
