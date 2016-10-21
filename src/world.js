@@ -7,7 +7,7 @@ var Mixins = require('./mixins');
 var assert = require('./assert');
 
 var World = augment(PIXI.Container, function(uber){
-  
+
   this.constructor = function(options){
     uber.constructor.apply(this, arguments);
 
@@ -22,7 +22,7 @@ var World = augment(PIXI.Container, function(uber){
     this.camera = new Camera(screenWidth, screenHeight);
     this.camera.viewCenterX = screenWidth/2;
     this.camera.viewCenterY = screenHeight/2;
-    
+
     this.camera.zoomPivotX = screenWidth/2;
     this.camera.zoomPivotY = screenHeight/2;
 
@@ -35,11 +35,11 @@ var World = augment(PIXI.Container, function(uber){
     this.worldContainer = new PIXI.Container();
     uber.addChild.call(this, this.worldContainer);
     //any other child of this
-    
+
     this._showMinimap = false;
     //this.minimap = true;
   }
-  
+
   this.destroyMinimap = function(){
     if(!this._minimapInstance) return;
 
@@ -69,10 +69,10 @@ var World = augment(PIXI.Container, function(uber){
   this.setScreenSize = function(screenWidth, screenHeight){
     this._screenWidth = screenWidth;
     this._screenHeight = screenHeight;
-    
+
     this.camera.setScreenSize(this._screenWidth, this._screenHeight);
   }
-  
+
   this.addGlobalChild = function(child){
     uber.addChild.call(this, child);
   }
@@ -92,39 +92,39 @@ var World = augment(PIXI.Container, function(uber){
     //update & constrain the attached camera
     this.camera.update();
     this.cameraConstrain.update(this.camera);
-    
+
     if(this.minimap){
       this._minimapInstance.update();
     }
-    
+
     //check if the world mixed in the update method, which is handy on our children to follow
     //the camera or whatever should be done durign each update
     if(!World.__updateMixed) return;
-    
+
     //Kickoff the update call to all children. We can now
     //assume update is available on all children.
-    for (var i = 0, j = this.children.length; i < j; ++i){   
+    for (var i = 0, j = this.children.length; i < j; ++i){
       if(this.children[i]){
         this.children[i].update();
       }
     }
   };
-  
+
   //override pixi's updateTransform, merge the camera transform values
   //and then contine with updatig the children of this world
   this.updateTransform = function(){
     uber.updateTransform.call(this);
     this.updateWorldTransform();
   }
-  
+
   this.updateWorldTransform = function(){
     var ct = this.camera.transform;
     var pt = this.worldTransform;
     var wt = this.worldContainer.worldTransform;
-    
+
     //this will merge the camera view with the world container transform (this is not recommened to do so, so just in case)
     ct.prepend(pt);
-    
+
     //console.log(pt, wt)
     //debugger;
     // temporary matrix variables
@@ -165,11 +165,11 @@ Object.defineProperty(World.prototype, 'minimap', {
     set: function (value) {
         this._showMinimap = value;
         if(this._showMinimap){
-          this.createMinimap();  
+          this.createMinimap();
         }else{
           this.destroyMinimap();
         }
-        
+
     }
 
 });

@@ -114,9 +114,6 @@ var Camera = augment.defclass({
   },
   update: function(){
     if(this.followTargets.length){
-        // this.x = this.followTargets.reduce((a, b) => Math.min(a.x, b.x));
-        // this.y = this.followTargets.reduce((a, b) => Math.min(a.y, b.y));
-
         var minX = this.followTargets.reduce((a, b) => Math.min(a.x, b.x));
         var minY = this.followTargets.reduce((a, b) => Math.min(a.y, b.y));
         var maxX = this.followTargets.reduce((a, b) => Math.max(a.x, b.x));
@@ -129,8 +126,6 @@ var Camera = augment.defclass({
         this.y = y;
 
         var zoomX = this.view.width / (maxX - minX + this.view.width * 0.3);
-        //var zoomY = ((maxY - minY) / this.view.height) || 1;
-        //this.zoom = Math.min(zoomX, zoomY);
         this.zoom = Math.min(zoomX, 1.5);
     }
 

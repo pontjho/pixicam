@@ -1,5 +1,5 @@
 {
-  "name": "pixicam",
+  "name": "@mocks/pixicam",
   "version": "0.0.1",
   "description": "2d matrix based camera system",
   "author": "Georgios Kaleadis",
